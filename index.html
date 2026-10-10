@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#7e57c2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Помощник">
+<title>Мой Помощник</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e57c2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #fff;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+  .card h2 {
+    font-size: 1.3em;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+  }
+
+  /* ЧАСЫ */
+  .clock-time {
+    font-size: 3em;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+  }
+  .clock-date {
+    text-align: center;
+    font-size: 1.1em;
+    opacity: 0.9;
+    margin-top: 8px;
+    text-transform: capitalize;
+  }
+
+  /* ПОГОДА — кнопка */
+  .weather-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 25px 15px;
+    background: linear-gradient(135deg, rgba(126, 87, 194, 0.4), rgba(149, 117, 205, 0.4));
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 15px;
+    text-decoration: none;
+    color: #fff;
+    transition: 0.25s;
+    text-align: center;
+  }
+  .weather-btn:hover {
+    background: linear-gradient(135deg, rgba(126, 87, 194, 0.6), rgba(149, 117, 205, 0.6));
+    transform: scale(1.03);
+    box-shadow: 0 8px 25px rgba(126, 87, 194, 0.5);
+  }
+  .weather-btn .big-icon { font-size: 3.5em; }
+  .weather-btn .label { font-size: 1.15em; font-weight: 600; }
+  .weather-btn .hint { font-size: 0.85em; opacity: 0.75; }
+
+  /* НОВОСТИ */
+  .news-list { list-style: none; }
+  .news-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .news-list li:last-child { border-bottom: none; }
+  .news-list a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.92em;
+    display: block;
+    transition: 0.2s;
+    opacity: 0.9;
+  }
+  .news-list a:hover { opacity: 1; text-decoration: underline; }
+
+  /* ССЫЛКИ */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+  }
+  .link-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 0.75em;
+    text-align: center;
+    transition: 0.2s;
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    position: relative;
+  }
+  .link-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.08); }
+  .link-btn .icon { font-size: 1.8em; margin-bottom: 5px; }
+  .link-btn .remove {
+    position: absolute; top: 2px; right: 6px; font-size: 1em;
+    opacity: 0; color: #ff6b6b; font-weight: bold;
+  }
+  .link-btn:hover .remove { opacity: 1; }
+  .add-link { display: flex; gap: 8px; margin-top: 12px; }
+  .add-link input {
+    flex: 1; padding: 8px 12px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1); color: #fff; font-size: 0.85em; outline: none;
+  }
+  .add-link input::placeholder { color: rgba(255,255,255,0.6); }
+  .add-link button {
+    padding: 8px 15px; border-radius: 8px; border: none;
+    background: #7e57c2; color: #fff; cursor: pointer; font-weight: bold; transition: 0.2s;
+  }
+  .add-link button:hover { background: #9575cd; }
+
+  /* КАЛЕНДАРЬ */
+  .cal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px;
+  }
+  .cal-header button {
+    background: rgba(255,255,255,0.15); border: none; color: #fff;
+    width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
+    font-size: 1.2em; transition: 0.2s;
+  }
+  .cal-header button:hover { background: rgba(255,255,255,0.3); }
+  .cal-title {
+    font-weight: 600; font-size: 1.05em; text-transform: capitalize;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+  }
+  .cal-grid div {
+    padding: 8px 0;
+    font-size: 0.9em;
+    border-radius: 6px;
+    color: #fff;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cal-grid .day-name {
+    opacity: 0.75;
+    font-size: 0.75em;
+    font-weight: 700;
+    color: #b39ddb;
+  }
+  .cal-grid .other-month { opacity: 0.3; }
+  .cal-grid .today {
+    background: #7e57c2;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(126, 87, 194, 0.8);
+  }
+  .cal-grid .day-num:hover {
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+  }
+
+  /* ДЕЛА */
+  .todo-input { display: flex; gap: 8px; margin-bottom: 15px; }
+  .todo-input input {
+    flex: 1; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1); color: #fff; font-size: 0.9em; outline: none;
+  }
+  .todo-input input::placeholder { color: rgba(255,255,255,0.6); }
+  .todo-input button {
+    padding: 10px 18px; border-radius: 10px; border: none;
+    background: #7e57c2; color: #fff; cursor: pointer;
+    font-size: 1.1em; font-weight: bold; transition: 0.2s;
+  }
+  .todo-input button:hover { background: #9575cd; }
+  .todo-list { list-style: none; max-height: 300px; overflow-y: auto; }
+  .todo-item {
+    display: flex; align-items: center; padding: 10px 12px;
+    background: rgba(255,255,255,0.08); border-radius: 10px;
+    margin-bottom: 8px; transition: 0.2s; gap: 10px;
+  }
+  .todo-item:hover { background: rgba(255,255,255,0.15); }
+  .todo-item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #7e57c2; }
+  .todo-item span { flex: 1; font-size: 0.95em; word-break: break-word; }
+  .todo-item.done span { text-decoration: line-through; opacity: 0.5; }
+  .todo-item .del {
+    background: none; border: none; color: #ff6b6b;
+    font-size: 1.2em; cursor: pointer; padding: 0 5px;
+    opacity: 0.6; transition: 0.2s;
+  }
+  .todo-item .del:hover { opacity: 1; transform: scale(1.2); }
+  .empty { text-align: center; opacity: 0.5; padding: 20px; font-size: 0.9em; }
+
+  /* УСТАНОВКА */
+  #installBtn {
+    display: none; position: fixed; bottom: 20px; right: 20px;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, #7e57c2, #9575cd);
+    color: #fff; border: none; border-radius: 50px;
+    font-size: 1em; font-weight: 600; cursor: pointer;
+    box-shadow: 0 8px 25px rgba(126, 87, 194, 0.6);
+    z-index: 9999;
+  }
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .clock-time { font-size: 2.3em; }
+    .card { padding: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ВРЕМЯ -->
+  <div class="card">
+    <h2>🕐 Время и дата</h2>
+    <div class="clock-time" id="clockTime">--:--:--</div>
+    <div class="clock-date" id="clockDate">Загрузка...</div>
+  </div>
+
+  <!-- ПОГОДА -->
+  <div class="card">
+    <h2>⛅ Погода</h2>
+    <a class="weather-btn" href="https://yandex.ru/pogoda/ru/krasnogorsk" target="_blank" rel="noopener">
+      <div class="big-icon">🌤️</div>
+      <div class="label">Погода в Красногорске</div>
+      <div class="hint">Открыть Яндекс.Погоду →</div>
+    </a>
+  </div>
+
+  <!-- НОВОСТИ -->
+  <div class="card">
+    <h2>📰 Новости</h2>
+    <ul class="news-list">
+      <li><a href="https://ria.ru" target="_blank" rel="noopener">РИА Новости</a></li>
+      <li><a href="https://lenta.ru" target="_blank" rel="noopener">Lenta.ru</a></li>
+      <li><a href="https://tass.ru" target="_blank" rel="noopener">ТАСС</a></li>
+      <li><a href="https://www.rbc.ru" target="_blank" rel="noopener">РБК</a></li>
+      <li><a href="https://news.mail.ru" target="_blank" rel="noopener">Новости Mail.ru</a></li>
+      <li><a href="https://yandex.ru/news" target="_blank" rel="noopener">Яндекс.Новости</a></li>
+    </ul>
+  </div>
+
+  <!-- ССЫЛКИ -->
+  <div class="card">
+    <h2>🔗 Быстрые ссылки</h2>
+    <div class="links-grid" id="linksGrid"></div>
+    <div class="add-link">
+      <input type="text" id="linkName" placeholder="Название">
+      <input type="text" id="linkUrl" placeholder="URL">
+      <button onclick="addLink()">+</button>
+    </div>
+  </div>
+
+  <!-- КАЛЕНДАРЬ -->
+  <div class="card">
+    <h2>📅 Календарь</h2>
+    <div class="cal-header">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="cal-title" id="calTitle"></div>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- ДЕЛА -->
+  <div class="card" style="grid-column: 1 / -1;">
+    <h2>✅ Список дел</h2>
+    <div class="todo-input">
+      <input type="text" id="todoInput" placeholder="Что нужно сделать?" onkeypress="if(event.key==='Enter') addTodo()">
+      <button onclick="addTodo()">+</button>
+    </div>
+    <ul class="todo-list" id="todoList"></ul>
+  </div>
+
+</div>
+
+<button id="installBtn">📲 Установить</button>
+
+<script>
+/* ===== ЧАСЫ И ДАТА (с устройства) ===== */
+function updateClock() {
+  var now = new Date();
+  document.getElementById('clockTime').textContent = now.toLocaleTimeString('ru-RU');
+  var dateStr = now.toLocaleDateString('ru-RU', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  document.getElementById('clockDate').textContent = dateStr;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ===== ССЫЛКИ ===== */
+var defaultLinks = [
+  { name: 'Google', url: 'https://google.com', icon: '🔍' },
+  { name: 'YouTube', url: 'https://youtube.com', icon: '▶️' },
+  { name: 'GitHub', url: 'https://github.com', icon: '💻' },
+  { name: 'Почта', url: 'https://mail.google.com', icon: '✉️' },
+  { name: 'Telegram', url: 'https://web.telegram.org', icon: '✈️' },
+  { name: 'Карты', url: 'https://maps.google.com', icon: '🗺️' }
+];
+function loadLinks() {
+  var s = localStorage.getItem('links');
+  return s ? JSON.parse(s) : defaultLinks;
+}
+function saveLinks(l) { localStorage.setItem('links', JSON.stringify(l)); }
+function renderLinks() {
+  var links = loadLinks();
+  var grid = document.getElementById('linksGrid');
+  grid.innerHTML = '';
+  links.forEach(function(l, i) {
+    var a = document.createElement('a');
+    a.className = 'link-btn';
+    a.href = l.url;
+    a.target = '_blank';
+    a.innerHTML = '<span class="icon">' + (l.icon || '🌐') + '</span>' + l.name +
+                  '<span class="remove" onclick="removeLink(event, ' + i + ')">✕</span>';
+    grid.appendChild(a);
+  });
+}
+function addLink() {
+  var name = document.getElementById('linkName').value.trim();
+  var url = document.getElementById('linkUrl').value.trim();
+  if (!name || !url) return;
+  if (url.indexOf('http') !== 0) url = 'https://' + url;
+  var links = loadLinks();
+  links.push({ name: name, url: url, icon: '🌐' });
+  saveLinks(links);
+  renderLinks();
+  document.getElementById('linkName').value = '';
+  document.getElementById('linkUrl').value = '';
+}
+function removeLink(e, i) {
+  e.preventDefault();
+  e.stopPropagation();
+  var links = loadLinks();
+  links.splice(i, 1);
+  saveLinks(links);
+  renderLinks();
+}
+renderLinks();
+
+/* ===== КАЛЕНДАРЬ ===== */
+var calDate = new Date();
+var monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь',
+                  'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+var dayNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+function renderCalendar() {
+  var year = calDate.getFullYear();
+  var month = calDate.getMonth();
+
+  document.getElementById('calTitle').textContent = monthNames[month] + ' ' + year;
+
+  var grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Шапка дней недели
+  dayNames.forEach(function(d) {
+    var el = document.createElement('div');
+    el.className = 'day-name';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  // Первый день месяца
+  var firstDay = new Date(year, month, 1);
+  var startDay = firstDay.getDay() - 1;
+  if (startDay < 0) startDay = 6;
+
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var prevDays = new Date(year, month, 0).getDate();
+
+  var today = new Date();
+  var todayY = today.getFullYear();
+  var todayM = today.getMonth();
+  var todayD = today.getDate();
+
+  // Дни предыдущего месяца
+  for (var i = startDay - 1; i >= 0; i--) {
+    var elP = document.createElement('div');
+    elP.className = 'other-month';
+    elP.textContent = prevDays - i;
+    grid.appendChild(elP);
+  }
+
+  // Дни текущего месяца
+  for (var d = 1; d <= daysInMonth; d++) {
+    var el = document.createElement('div');
+    el.className = 'day-num';
+    el.textContent = d;
+
+    if (d === todayD && month === todayM && year === todayY) {
+      el.classList.add('today');
+    }
+    grid.appendChild(el);
+  }
+
+  // Дни следующего месяца
+  var totalCells = startDay + daysInMonth;
+  var rest = (7 - (totalCells % 7)) % 7;
+  for (var k = 1; k <= rest; k++) {
+    var elN = document.createElement('div');
+    elN.className = 'other-month';
+    elN.textContent = k;
+    grid.appendChild(elN);
+  }
+}
+
+function changeMonth(delta) {
+  calDate.setMonth(calDate.getMonth() + delta);
+  renderCalendar();
+}
+
+renderCalendar();
+
+/* ===== ДЕЛА ===== */
+function loadTodos() {
+  var s = localStorage.getItem('todos');
+  return s ? JSON.parse(s) : [];
+}
+function saveTodos(t) { localStorage.setItem('todos', JSON.stringify(t)); }
+function escapeHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function renderTodos() {
+  var todos = loadTodos();
+  var list = document.getElementById('todoList');
+  list.innerHTML = '';
+  if (todos.length === 0) {
+    list.innerHTML = '<div class="empty">Пока пусто. Добавь первое дело! ✨</div>';
+    return;
+  }
+  todos.forEach(function(t, i) {
+    var li = document.createElement('li');
+    li.className = 'todo-item' + (t.done ? ' done' : '');
+    li.innerHTML = '<input type="checkbox" ' + (t.done ? 'checked' : '') +
+                   ' onchange="toggleTodo(' + i + ')">' +
+                   '<span>' + escapeHtml(t.text) + '</span>' +
+                   '<button class="del" onclick="removeTodo(' + i + ')">✕</button>';
+    list.appendChild(li);
+  });
+}
+function addTodo() {
+  var input = document.getElementById('todoInput');
+  var text = input.value.trim();
+  if (!text) return;
+  var todos = loadTodos();
+  todos.push({ text: text, done: false });
+  saveTodos(todos);
+  input.value = '';
+  renderTodos();
+}
+function toggleTodo(i) {
+  var todos = loadTodos();
+  todos[i].done = !todos[i].done;
+  saveTodos(todos);
+  renderTodos();
+}
+function removeTodo(i) {
+  var todos = loadTodos();
+  todos.splice(i, 1);
+  saveTodos(todos);
+  renderTodos();
+}
+renderTodos();
+
+/* ===== PWA: Service Worker ===== */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js')
+      .then(function(r) { console.log('✅ SW:', r.scope); })
+      .catch(function(e) { console.error('❌ SW:', e); });
+  });
+}
+
+/* ===== PWA: Установка ===== */
+var deferredPrompt = null;
+var installBtn = document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+installBtn.addEventListener('click', function() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function() {
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  });
+});
+window.addEventListener('appinstalled', function() {
+  installBtn.style.display = 'none';
+  console.log('✅ Установлено!');
+});
+</script>
+</body>
+</html>
